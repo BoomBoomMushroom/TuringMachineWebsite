@@ -1,0 +1,64 @@
+:root{
+    --tape-border-width: 2px;
+    --tape-cell-width: 64px;
+}
+
+
+body{
+    background-color: rgb(38, 38, 38);
+    color: white;
+    font-family: monospace;
+    margin: 0px;
+}
+
+#title{
+    margin-top: 10px;
+    text-align: center;
+}
+
+#tape{
+    position: absolute;
+    left: 0px;
+    width: 100%;
+    display: flex;
+
+    border: var(--tape-border-width) solid white;
+    border-left: none;
+    border-right: none;
+    overflow: hidden;
+}
+
+#cellPointer{
+    width: var(--tape-cell-width);
+    aspect-ratio: 1 / 1;
+    
+    position: relative;
+    margin: var(--tape-border-width);
+}
+
+#scroller{
+    position: relative;
+    display: flex;
+    left: 0px;
+}
+
+.tapeCell{
+    border: var(--tape-border-width) solid white;
+    border-top: none;
+    border-bottom: none;
+
+    width: var(--tape-cell-width);
+    aspect-ratio: 1 / 1;
+    position: relative;
+    /* Compensate for the border so we don't have a really wide bar between two cells*/
+    margin-right: calc(-1 * var(--tape-border-width));
+}
+
+.tapeCell p{
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3em;
+}
