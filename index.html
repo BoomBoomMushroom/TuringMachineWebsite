@@ -342,21 +342,80 @@
         ]
         */
 
+        
         var states = [
-            // find the right most bit
-            new State("0", "0", "0", "R", "0"),
-            new State("0", "1", "1", "R", "0"),
-            new State("0", BLANK_CHARACTER, BLANK_CHARACTER, "L", "1"),
+            new State("0", "S", "S", "R", "CopyR20"),
 
-            // replace all the ones to zeros, until we hit a zero (overflows instead of adding a new bit)
-            new State("1", "1", "0", "L", "1"),
-            new State("1", "0", "1", "L", "2"),
-            new State("1", BLANK_CHARACTER, BLANK_CHARACTER, "L", "2"),
+            new State("CopyR20", "1", "1", "R", "Copy1R20"),
+            new State("CopyR20", "0", "0", "R", "Copy0R20"),
+            new State("CopyR20", "E", "E", "L", "HALT"),
 
-            // go to right of value
-            new State("2", "0", "0", "L", "2"),
-            new State("2", "1", "1", "L", "2"),
-            new State("2", BLANK_CHARACTER, BLANK_CHARACTER, "R", "HALT"),
+            // Copy a 1
+            new State("Copy1R20", null, null, "R", "Copy1R19"),
+            new State("Copy1R19", null, null, "R", "Copy1R18"),
+            new State("Copy1R18", null, null, "R", "Copy1R17"),
+            new State("Copy1R17", null, null, "R", "Copy1R16"),
+            new State("Copy1R16", null, null, "R", "Copy1R15"),
+            new State("Copy1R15", null, null, "R", "Copy1R14"),
+            new State("Copy1R14", null, null, "R", "Copy1R13"),
+            new State("Copy1R13", null, null, "R", "Copy1R12"),
+            new State("Copy1R12", null, null, "R", "Copy1R11"),
+            new State("Copy1R11", null, null, "R", "Copy1R10"),
+            new State("Copy1R10", null, null, "R", "Copy1R9"),
+            new State("Copy1R9", null, null, "R", "Copy1R8"),
+            new State("Copy1R8", null, null, "R", "Copy1R7"),
+            new State("Copy1R7", null, null, "R", "Copy1R6"),
+            new State("Copy1R6", null, null, "R", "Copy1R5"),
+            new State("Copy1R5", null, null, "R", "Copy1R4"),
+            new State("Copy1R4", null, null, "R", "Copy1R3"),
+            new State("Copy1R3", null, null, "R", "Copy1R2"),
+            new State("Copy1R2", null, null, "R", "Copy1R1"),
+            new State("Copy1R1", null, "1", "R", "Left20"),
+
+            // Copy a 1
+            new State("Copy0R20", null, null, "R", "Copy0R19"),
+            new State("Copy0R19", null, null, "R", "Copy0R18"),
+            new State("Copy0R18", null, null, "R", "Copy0R17"),
+            new State("Copy0R17", null, null, "R", "Copy0R16"),
+            new State("Copy0R16", null, null, "R", "Copy0R15"),
+            new State("Copy0R15", null, null, "R", "Copy0R14"),
+            new State("Copy0R14", null, null, "R", "Copy0R13"),
+            new State("Copy0R13", null, null, "R", "Copy0R12"),
+            new State("Copy0R12", null, null, "R", "Copy0R11"),
+            new State("Copy0R11", null, null, "R", "Copy0R10"),
+            new State("Copy0R10", null, null, "R", "Copy0R9"),
+            new State("Copy0R9", null, null, "R", "Copy0R8"),
+            new State("Copy0R8", null, null, "R", "Copy0R7"),
+            new State("Copy0R7", null, null, "R", "Copy0R6"),
+            new State("Copy0R6", null, null, "R", "Copy0R5"),
+            new State("Copy0R5", null, null, "R", "Copy0R4"),
+            new State("Copy0R4", null, null, "R", "Copy0R3"),
+            new State("Copy0R3", null, null, "R", "Copy0R2"),
+            new State("Copy0R2", null, null, "R", "Copy0R1"),
+            new State("Copy0R1", null, "0", "R", "Left20"),
+
+
+            // go back to the value to copy
+            new State("Left20", null, null, "L", "Left19"),
+            new State("Left19", null, null, "L", "Left18"),
+            new State("Left18", null, null, "L", "Left17"),
+            new State("Left17", null, null, "L", "Left16"),
+            new State("Left16", null, null, "L", "Left15"),
+            new State("Left15", null, null, "L", "Left14"),
+            new State("Left14", null, null, "L", "Left13"),
+            new State("Left13", null, null, "L", "Left12"),
+            new State("Left12", null, null, "L", "Left11"),
+            new State("Left11", null, null, "L", "Left10"),
+            new State("Left10", null, null, "L", "Left9"),
+            new State("Left9", null, null, "L", "Left8"),
+            new State("Left8", null, null, "L", "Left7"),
+            new State("Left7", null, null, "L", "Left6"),
+            new State("Left6", null, null, "L", "Left5"),
+            new State("Left5", null, null, "L", "Left4"),
+            new State("Left4", null, null, "L", "Left3"),
+            new State("Left3", null, null, "L", "Left2"),
+            new State("Left2", null, null, "L", "Left1"),
+            new State("Left1", null, null, "L", "CopyR20")
         ]
 
         var currentState = "0"
@@ -379,6 +438,11 @@
             for(let i=0; i<states.length; i++){
                 let current = states[i]
                 if(current.id != currentState){ continue }
+
+                if(current.read == null && currentStateObj == null){
+                    // this is the default state, will be replaced by the right state if it exists
+                    currentStateObj = current
+                }
                 if(current.read != valueAtHead){ continue }
                 
                 currentStateObj = current
