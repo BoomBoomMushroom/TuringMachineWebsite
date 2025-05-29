@@ -85,6 +85,15 @@
             color: white;
             text-align: center;
         }
+
+        .controls{
+            margin-left: 10px;
+            margin-bottom: 150px;
+        }
+
+        .state > *{
+            margin-left: 4px;
+        }
     </style>
 </head>
 <body>
@@ -103,13 +112,23 @@
 
     <br><br><br><br><br><br><br><br>
 
-    <button onclick="toggleMachine()" id="MachineToggleButton">Click to enable the machine</button>
-    <br><br>
-    <button onclick="stepTuringMachine()">Step Machine</button>
-    <br><br>
-    <button onclick="moveTapeLeft()">Move Left</button>
-    <button onclick="moveTapeRight()">Move Right</button>
-    
+    <div class="controls">
+        <button onclick="toggleMachine()" id="MachineToggleButton">Click to enable the machine</button>
+        <br><br>
+        <button onclick="stepTuringMachine()">Step Machine</button>
+        <br><br>
+        <button onclick="moveTapeLeft()">Move Left</button>
+        <button onclick="moveTapeRight()">Move Right</button>
+        <br><br>
+        <h2>States</h2>
+        <h2>State Id, Read, Write, Move Direction, Next State Id (Put nothing for blank character)</h2>
+        <div id="statesHolder"></div>
+        <button onclick="createNewState()">Create New State</button>
+        <button onclick="exportStates()">Export States</button>
+        <button onclick="importStates()">Import States</button>
+    </div>
+
+
     <script>
         const tapeScroller = document.getElementById("scroller")
         const currentStateElement = document.getElementById("currentState")
@@ -143,7 +162,7 @@
                 this.nextStateId = nextStateId
             }
         }
-        
+
         /*
         var states = [
             // https://stackoverflow.com/questions/59045832/turing-machine-for-addition-and-comparison-of-binary-numbers
@@ -342,12 +361,16 @@
         ]
         */
 
-        
+
         // Register setup
         // X00000000 Y00000000 A00000000 etc
+        
         var states = [
             
         ]
+        
+        loadStates()
+        statesArrayToStateElements()
 
         var currentState = "0"
         currentStateElement.value = currentState // first init
@@ -407,7 +430,7 @@
 
             if(endingIdentifiers.includes(currentState)){
                 console.log(`Ending with state: ${currentState}`)
-                clearInterval(runningInterval)
+                //clearInterval(runningInterval)
 
                 currentStateElement.value = endingIdentifiersToEmoji[currentState]
             }
@@ -419,6 +442,176 @@
             document.getElementById("MachineToggleButton").innerText = newText
         }
 
+
+        function loadStates(){
+            let statesString = localStorage.getItem("states")
+            try{ states = JSON.parse(statesString) }
+            catch{ states = [] }
+
+            if(states == null){ states = [] }
+            statesArrayToStateElements()
+        }
+        function saveStates(){
+            let statesString = JSON.stringify(states)
+            localStorage.setItem("states", statesString)
+        }
+
+        function statesArrayToStateElements(){
+            let statesHolderDiv = document.getElementById("statesHolder")
+            while(statesHolderDiv.children.length > 0){
+                statesHolderDiv.children[0].remove()
+            }
+
+            for(let i=0; i<states.length; i++){
+                let currentState = states[i]
+                createNewState(currentState.id, currentState.read, currentState.write, currentState.move, currentState.nextStateId)
+            }
+        }
+
+        function stateDivToStateClass(div){
+            let id = null
+            let read = null
+            let write = null
+            let moveDirection = null
+            let nextStateId = null
+
+            for(let i=0; i<div.children.length; i++){
+                let child = div.children[i]
+                let value = child.value
+                if(id == null){ id = value }
+                else if(read == null){ read = value }
+                else if(write == null){ write = value }
+                else if(moveDirection == null){ moveDirection = value }
+                else if(nextStateId == null){ nextStateId = value }
+                else{ break }
+            }
+
+            // do not replace the blank input with BLANK_CHARACTER because it will be the default state; default state being null
+            if(read == ""){ read = null }
+            if(write == ""){ write = null }
+
+            return new State(id, read, write, moveDirection, nextStateId)
+        }
+        function stateElementsToArray(){
+            states = []
+            let statesHolderElement = document.getElementById("statesHolder")
+            for(let i=0; i<statesHolderElement.children.length; i++){
+                let child = statesHolderElement.children[i]
+                if(child.tagName != "DIV"){ continue }
+                let state = stateDivToStateClass(child)
+                states.push(state)
+            }
+        }
+
+        // add the ability to copy (export) and paste (import) full state strings. Like an array of many states
+        function updateStates(){
+            stateElementsToArray()
+            saveStates()
+        }
+
+        function removeState(UUID){
+            document.getElementById(UUID).remove()
+            document.getElementById(UUID+"-br").remove()
+            updateStates()
+        }
+
+        function createNewState(stateId="", readSymbol="", writeSymbol="", moveDirection="", nextStateId=""){
+            let statesHolderElement = document.getElementById("statesHolder")
+            let UUID = crypto.randomUUID()
+
+            let stateDiv = document.createElement("div")
+            stateDiv.classList.add("state")
+            stateDiv.id = UUID
+            statesHolderElement.appendChild(stateDiv)
+
+            let idInput = document.createElement("input")
+            idInput.placeholder = "State Id"
+            idInput.value = stateId
+            stateDiv.appendChild(idInput)
+
+            let readSymbolInput = document.createElement("input")
+            readSymbolInput.placeholder = "Read Symbol"
+            readSymbolInput.value = readSymbol
+            stateDiv.appendChild(readSymbolInput)
+
+            let writeSymbolInput = document.createElement("input")
+            writeSymbolInput.placeholder = "Write Symbol"
+            writeSymbolInput.value = writeSymbol
+            stateDiv.appendChild(writeSymbolInput)
+
+            let moveDirectionSelect = document.createElement("select")
+            stateDiv.appendChild(moveDirectionSelect)
+
+            let moveDirectionPlaceholderOption = document.createElement("option")
+            moveDirectionPlaceholderOption.placeholder = "Move Direction"
+            moveDirectionPlaceholderOption.value = ""
+            moveDirectionPlaceholderOption.innerText = "Move Direction"
+            moveDirectionSelect.appendChild(moveDirectionPlaceholderOption)
+
+            let moveDirectionLeftOption = document.createElement("option")
+            moveDirectionLeftOption.value = "L"
+            moveDirectionLeftOption.innerText = "Left"
+            moveDirectionLeftOption.selected = moveDirection == "L"
+            moveDirectionSelect.appendChild(moveDirectionLeftOption)
+
+            let moveDirectionRightOption = document.createElement("option")
+            moveDirectionRightOption.value = "R"
+            moveDirectionRightOption.innerText = "Right"
+            moveDirectionRightOption.selected = moveDirection == "R"
+            moveDirectionSelect.appendChild(moveDirectionRightOption)
+            
+            let nextStateIdInput = document.createElement("input")
+            nextStateIdInput.placeholder = "Next State Id"
+            nextStateIdInput.value = nextStateId
+            stateDiv.appendChild(nextStateIdInput)
+
+            let removeButton = document.createElement("button")
+            removeButton.innerText = "X"
+            removeButton.onclick = ()=>{removeState(UUID)}
+            stateDiv.appendChild(removeButton)
+
+            // add a break line to make it look prettier
+            let newLineElement = document.createElement("br")
+            newLineElement.id = UUID + "-br"
+            statesHolderElement.appendChild(newLineElement)
+
+            /*
+            <div class="state" id="UUID_HERE">
+                <input placeholder="State Id">
+                <input placeholder="Read Symbol">
+                <input placeholder="Write Symbol">
+                <select>
+                    <option value="">Move Direction</option>
+                    <option value="L">Left</option>
+                    <option value="R">Right</option>
+                </select>
+                <input placeholder="Next State Id">
+                <button onclick=removeState("UUID_HERE")>X</button>
+            </div>
+            <br>
+            */
+        }
+
+        function exportStates(){
+            navigator.clipboard.writeText( localStorage.getItem("states") )
+            alert("Copied to clipboard!")
+        }
+        function importStates(){
+            let importString = prompt("Paste the states to import (You get it from the export)")
+            let isValid = true
+            try{
+                let parsed = JSON.parse(importString)
+            }catch{ isValid = false }
+
+            if(isValid == false){
+                console.log("not valid")
+                return
+            }
+
+            localStorage.setItem("states", importString)
+            loadStates()
+            alert("Successfully imported!")
+        }
 
 
         // just enough to fill screen + 2
@@ -536,9 +729,10 @@
         document.addEventListener('keydown', (e) => {
             if(e.key == "Shift"){ isShiftPressed = true }
             if (e.key === 'Tab') {
-                e.preventDefault();
                 // Custom logic to focus next element manually
-                let currentCellId = parseInt(document.activeElement.parentElement.id)
+                let parentElement = document.activeElement.parentElement
+                if(parentElement.classList.contains("tapeCell") == false){return}
+                let currentCellId = parseInt(parentElement.id)
                 let nextElementId = currentCellId + (isShiftPressed ? -1 : 1)
                 let nextElement = document.getElementById(nextElementId)
                 let hideScrollAnimation = true
@@ -556,8 +750,23 @@
                 let nextElementInput = nextElement.children[0]
                 nextElementInput.focus({ preventScroll: true })
                 nextElementInput.select()
-
-                console.log(isElementInViewport(nextElementInput))
+                e.preventDefault(); // success! Prevent the default thing from happening
+            }
+        });
+    
+        
+        document.getElementById("statesHolder").addEventListener('input', (event) => {
+            const target = event.target;
+            if (target.matches('input')) {
+                //console.log('Input changed:', target.name || target.id, target.value);
+                updateStates()
+            }
+        });
+        document.getElementById("statesHolder").addEventListener('change', (event) => {
+            const target = event.target;
+            if (target.matches('select')) {
+                //console.log('Selection changed:', target.name || target.id, target.value);
+                updateStates()
             }
         });
     </script>
