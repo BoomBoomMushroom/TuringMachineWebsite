@@ -144,6 +144,7 @@
         var oneTapeCellWidth = 66 // 64px for cell with (.tapeCell>width) + 2px for border (:root>--tape-border-width)
         var validMemoryCells = []
         var currentMemoryIndex = 0
+        var DONT_MAKE_STATE_ELEMENTS_IF_MORE_THAN_THIS = 500
 
         var endingIdentifiers = ["HALT", "REJECT", "ACCEPT"]
         var endingIdentifiersToEmoji = {
@@ -279,8 +280,21 @@
 
         function statesArrayToStateElements(){
             let statesHolderDiv = document.getElementById("statesHolder")
+            // if the states holder doesn't exist then don't bother w/ this
+            if(statesHolderDiv == null){
+                console.warn("Element with id `statesHolder` doesn't exist! Skipping `statesArrayToStateElements`")
+                return
+            }
+            
             while(statesHolderDiv.children.length > 0){
                 statesHolderDiv.children[0].remove()
+            }
+
+            if(states.length > DONT_MAKE_STATE_ELEMENTS_IF_MORE_THAN_THIS && DONT_MAKE_STATE_ELEMENTS_IF_MORE_THAN_THIS != -1){
+                console.warn("Not creating state elements since there is " + states.length + " states and our threshold for not making them is " + DONT_MAKE_STATE_ELEMENTS_IF_MORE_THAN_THIS);
+                console.warn("If you want to increase this limit, type `DONT_MAKE_STATE_ELEMENTS_IF_MORE_THAN_THIS = new_limit` | If you want to remove this limit do `DONT_MAKE_STATE_ELEMENTS_IF_MORE_THAN_THIS = -1`")
+                alert("Not creating state elements since it's past the threshold (" + DONT_MAKE_STATE_ELEMENTS_IF_MORE_THAN_THIS + ") check console for more details. The states are still there, just not visible")
+                return
             }
 
             for(let i=0; i<states.length; i++){
