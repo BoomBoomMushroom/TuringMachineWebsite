@@ -290,14 +290,17 @@
                 statesHolderDiv.children[0].remove()
             }
 
+            let stateElementsToMake = states.length;
+
             if(states.length > DONT_MAKE_STATE_ELEMENTS_IF_MORE_THAN_THIS && DONT_MAKE_STATE_ELEMENTS_IF_MORE_THAN_THIS != -1){
-                console.warn("Not creating state elements since there is " + states.length + " states and our threshold for not making them is " + DONT_MAKE_STATE_ELEMENTS_IF_MORE_THAN_THIS);
+                console.warn("Not creating all the state elements since there is " + states.length + " states and our threshold for not making them is " + DONT_MAKE_STATE_ELEMENTS_IF_MORE_THAN_THIS);
                 console.warn("If you want to increase this limit, type `DONT_MAKE_STATE_ELEMENTS_IF_MORE_THAN_THIS = new_limit` | If you want to remove this limit do `DONT_MAKE_STATE_ELEMENTS_IF_MORE_THAN_THIS = -1`")
-                alert("Not creating state elements since it's past the threshold (" + DONT_MAKE_STATE_ELEMENTS_IF_MORE_THAN_THIS + ") check console for more details. The states are still there, just not visible")
+                alert("Not creating all the state elements since it's past the threshold (" + DONT_MAKE_STATE_ELEMENTS_IF_MORE_THAN_THIS + ") check console for more details. The states are still there, just not visible")
                 return
             }
 
-            for(let i=0; i<states.length; i++){
+            stateElementsToMake = DONT_MAKE_STATE_ELEMENTS_IF_MORE_THAN_THIS;
+            for(let i=0; i<stateElementsToMake; i++){
                 let currentState = states[i]
                 createNewState(currentState.id, currentState.read, currentState.write, currentState.move, currentState.nextStateId)
             }
