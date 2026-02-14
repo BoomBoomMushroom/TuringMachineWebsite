@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <head>
     <title>Turing Machine</title>
 
@@ -175,6 +176,9 @@
         var states = [
             
         ]
+
+        // key is the state id, value is a list of all states w/ the same id
+        var stateDictionary = {}
         
         loadStates()
         statesArrayToStateElements()
@@ -213,8 +217,16 @@
 
             let valueAtHead = valueAtHeadElement.value
             let currentStateObj = null
-            for(let i=0; i<states.length; i++){
-                let current = states[i]
+
+            // check if the id exists
+            if(stateDictionary.hasOwnProperty(currentState) == false){
+                throw Error(`No state with id "${currentState}" exists!`);
+            }
+
+            let subStatesArray = stateDictionary[currentState]
+
+            for(let i=0; i<subStatesArray.length; i++){
+                let current = subStatesArray[i]
                 if(current.id != currentState){ continue }
 
                 if(current.read == null && currentStateObj == null){
@@ -266,13 +278,31 @@
             document.getElementById("MachineToggleButton").innerText = newText
         }
 
+        function statesToDictionary(){
+            stateDictionary = {}
+            
+            for(let i=0; i<states.length; i++){
+                let stateAtIndex = states[i]
+                let stateId = stateAtIndex.id
+
+                // make sure we have an array to append to
+                if(stateDictionary.hasOwnProperty(stateId) == false){ stateDictionary[stateId] = []; }
+
+                stateDictionary[stateId].push(stateAtIndex)
+            }
+        }
 
         function loadStates(){
             let statesString = localStorage.getItem("states")
             try{ states = JSON.parse(statesString) }
             catch{ states = [] }
 
-            if(states == null){ states = [] }
+            if(states == null){
+                states = []
+                stateDictionary = {}
+            }
+
+            statesToDictionary();
             statesArrayToStateElements()
         }
         function saveStates(){
