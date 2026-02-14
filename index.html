@@ -135,6 +135,8 @@
 
 
     <script>
+        // TODO: Optimize how the currentState is found. RN it is O(n) as it has to traverse the ENTIRE list before it finds the right state
+
         const tapeScroller = document.getElementById("scroller")
         const currentStateElement = document.getElementById("currentState")
         const fileElement = document.getElementById("fileElem");
@@ -197,10 +199,10 @@
 
         var speedSliderElement = document.getElementById("MachineSpeedSlider")
         var speedSliderLabelElement = document.getElementById("MachineSpeedSliderLabel")
-        var checkSpeedSliderInterval = setInterval(()=>{
-            stepInterval = speedSliderElement.value
-            speedSliderLabelElement.innerText = "Step Interval (" + stepInterval + "ms)"
-        }, 1)
+        speedSliderElement.onchange = (e)=>{
+            stepInterval = e.target.value; // set the step interval to the value of the slider
+            speedSliderLabelElement.innerText = "Step Interval (" + stepInterval + "ms)";
+        }
 
         currentStateElement.addEventListener("change", (event)=>{
             currentState = currentStateElement.value
